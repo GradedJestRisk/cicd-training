@@ -1,0 +1,26 @@
+# docker compose up --detach
+# docker inspect --format "{{json .State.Health }}" dependency-two | jq
+
+services:
+
+  main:
+    image: hello-world
+    depends_on:
+      dependency-one:
+        condition: service_completed_successfully
+      dependency-two:
+        condition: service_healthy
+
+  dependency-one:
+    image: alpine
+    container_name: dependency-one
+    entrypoint: "sleep 3"
+
+  dependency-two:
+    image: ixortalk/ixortalk-prometheus-faker:latest
+    container_name: dependency-two
+    healthcheck:
+      test: "curl localhost:9191/prometheus"
+      interval: 2s
+      timeout: 10s
+      retries: 5
