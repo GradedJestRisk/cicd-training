@@ -1,0 +1,39 @@
+#  https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/
+
+# docker compose up --detach --wait --force-recreate --remove-orphans
+# docker inspect --format "{{json .State.Health }}" dotenv_file_explicit |  jq
+# docker exec --interactive --tty environment-variables-dotenv_file_explicit bash
+# docker exec --interactive --tty environment-variables-dotenv_file_explicit-1 bash -c "echo \$VALUE"
+
+services:
+
+  environment_mapping:
+    image: bash
+    entrypoint: "sleep 10000"
+    environment:
+      VALUE : A
+    healthcheck:
+      test: "[ $$VALUE = 'A' ]"
+      interval: 2s
+      timeout: 10s
+      retries: 5
+
+  dotenv_file_implicit:
+    image: bash
+    entrypoint: "sleep 10000"
+    env_file: ".env"
+    healthcheck:
+      test: "[ $$VALUE = 'B' ]"
+      interval: 2s
+      timeout: 10s
+      retries: 5
+
+  dotenv_file_explicit:
+    image: bash
+    entrypoint: "sleep 10000"
+    env_file: "explicit.env"
+    healthcheck:
+      test: "[ $$VALUE = 'C' ]"
+      interval: 2s
+      timeout: 10s
+      retries: 5
