@@ -1,0 +1,89 @@
+# https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/
+
+# docker compose up --detach --wait --force-recreate --remove-orphans
+# docker inspect --format "{{json .State.Health }}" dotenv_file_explicit |  jq
+# docker exec --interactive --tty environment-variables-dotenv_file_explicit bash
+# docker exec --interactive --tty environment-variables-dotenv_file_explicit-1 bash -c "echo \$VALUE"
+
+services:
+
+  environment_mapping:
+    image: bash
+    entrypoint: "sleep 10000"
+    environment:
+      VALUE : A
+    healthcheck:
+      test: "[ $$VALUE = 'A' ]"
+      interval: 1s
+
+  dotenv_file_unset:
+    image: bash
+    entrypoint: "sleep 10000"
+    env_file: ".env"
+    healthcheck:
+      test: "[ -v $$UNSET ]"
+      interval: 1s
+
+  dotenv_file_explicit:
+    image: bash
+    entrypoint: "sleep 10000"
+    env_file: "explicit.env"
+    healthcheck:
+      test: "[ $$VALUE = 'C' ]"
+      interval: 1s
+
+  dotenv_file_shadowing:
+    image: bash
+    environment:
+      VALUE: B
+    env_file: "explicit.env"
+    entrypoint: "sleep 10000"
+    healthcheck:
+      test: "[ $$VALUE = 'B' ]"
+      interval: 1s
+
+  dotenv_file_several:
+    image: bash
+    env_file:
+      - .env
+      - overriding.env
+    entrypoint: "sleep 10000"
+    healthcheck:
+      test: "[ $$VALUE = 'C' ]"
+      interval: 1s
+
+  no_os_shadowing:
+    image: bash
+    entrypoint: "sleep 10000"
+    environment:
+      OS_VALUE : B
+    healthcheck:
+      test: "[ $$OS_VALUE = 'B' ]"
+      interval: 1s
+
+  os_passthroughs:
+    image: bash
+    entrypoint: "sleep 10000"
+    environment:
+      - OS_VALUE
+    healthcheck:
+      test: "[ $$OS_VALUE = 'A' ]"
+      interval: 1s
+
+  var_no_warn_if_not_defined:
+    image: bash
+    entrypoint: "sleep 10000"
+    environment:
+      - UNSET_VALUE_IN_OS
+    healthcheck:
+      test: "[ -v $$UNSET_VALUE_IN_OS ]"
+      interval: 1s
+
+  var_warn_if_not_defined:
+    image: bash
+    entrypoint: "sleep 10000"
+    environment:
+      - UNSET_VALUE_IN_OS=${UNSET_VALUE_IN_OS}
+    healthcheck:
+      test: "[ -v $$UNSET_VALUE_IN_OS ]"
+      interval: 1s
