@@ -1,0 +1,30 @@
+build:
+	docker build --tag ssh .
+
+prune:
+    docker stop ssh
+    docker container rm --force ssh
+    #docker image rm ssh
+
+start:
+    docker run --name ssh --detach -p 2222:22 -p 23:23 ssh
+
+start-ssh:
+    service ssh start
+
+stop:
+    docker stop ssh && docker container rm ssh
+#ip:
+#    docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ssh
+
+connect:
+    docker exec -it ssh bash
+
+connect-ssh:
+	ssh jane@$SSH_IP -p 2222
+
+logs:
+    docker logs --follow ssh
+
+logs-ssh:
+    docker exec ssh bash -c "tail -f /var/log/auth.log"
